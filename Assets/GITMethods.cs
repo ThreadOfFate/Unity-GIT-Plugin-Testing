@@ -42,7 +42,10 @@ public class GITMethods
         
         string output = process.StandardOutput.ReadToEnd();
         output = output.Replace(" ", "");
-        output = output.Substring(0, output.Length - 2);
+        if (output.EndsWith("\n"))
+        {
+            output = output.Substring(0, output.Length - 1);
+        }
         output = output.Replace("\n", Environment.NewLine);
         
         string[] branches = output.Split(
@@ -77,6 +80,10 @@ public class GITMethods
                 continue;
             }
             output = output.Replace(" ", "");
+            if (output.EndsWith("\n"))
+            {
+                output = output.Substring(0, output.Length - 1);
+            }
             output = output.Replace("\n", Environment.NewLine);
 
             string[] files = output.Split(
