@@ -77,7 +77,6 @@ public class GITMethods
                 continue;
             }
             output = output.Replace(" ", "");
-            output = output.Substring(0, output.Length - 2);
             output = output.Replace("\n", Environment.NewLine);
 
             string[] files = output.Split(
