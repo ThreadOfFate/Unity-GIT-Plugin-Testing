@@ -1,21 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-public class GITMethods
+public static class GITMethods
 {
-    public GITMethods()
+    private static GitSettings _settings => (GitSettings) AssetDatabase.LoadAssetAtPath("Assets/GitPlugin/GitSettings.asset", typeof(GitSettings));
+    private static string _path = "";
+    private static void SetPath()
     {
-        SetPath();
-    }
-
-    private string _path;
-    private void SetPath()
-    {
+        if (_path != "")
+        {
+            return;
+        }
         var path = Application.dataPath;
         while (!path.EndsWith("/"))
         {
@@ -23,9 +22,10 @@ public class GITMethods
         }
         _path = path.Remove(path.Length - 1);
     }
-    
-    public string[] GetAllRemoteBranches()
+
+    public static string[] GetAllRemoteBranches()
     {
+        SetPath();
         var startInfo = new ProcessStartInfo
         {
             WorkingDirectory = _path,
@@ -55,8 +55,12 @@ public class GITMethods
         return branches;
     }
     
-    public string[] GetAllFilesChanges(string baseBranch,string[] otherBranches)
+    public static string[] GetAllFilesChanges()
     {
+        string baseBranch = "HEAD"; 
+        string[] otherBranches = _settings.activeBranches;
+        
+        SetPath();
         List<string> allFiles = new List<string>();
         foreach (var currentBranch in otherBranches)
         {
@@ -93,5 +97,17 @@ public class GITMethods
             allFiles.AddRange(files);
         }
         return allFiles.Distinct().ToArray();
+    }
+
+    [MenuItem("Git/UpdatedActiveBranches")]
+    public static void SetActiveBranches()
+    {
+        _settings.activeBranches = GetAllActiveBranches();
+    }
+
+    public static string[] GetAllActiveBranches()
+    {
+        var allBranches = GetAllRemoteBranches();
+        return allBranches.Where((string branch) => branch.StartsWith(_settings.activeFolder)).ToArray();
     }
 }
